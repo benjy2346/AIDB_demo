@@ -1,3 +1,4 @@
+After download, change the current folder to aidb_demo to ensure the relative path works.
 Run the file main.py
 
 Example output:
@@ -28,7 +29,6 @@ CREATE TABLE IF NOT EXISTS Sentences (
     Sentence TEXT,
     Source INT
 )
-
 
 CREATE TABLE IF NOT EXISTS Mapping (
     SentenceID INTEGER,

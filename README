@@ -1,0 +1,52 @@
+Run the file main.py
+
+Example output:
+"""test SUM() approximate query:
+with sql: SELECT SUM(score) FROM Mapping WHERE label = 'POSITIVE' ERROR_TARGET 10% CONFIDENCE 95%;
+approximate_results of SUM() = (170.9101139008999, (167.94364237251958, 173.8765854292802))
+actual_results of SUM() = [(161.8175706267357,)]
+
+test AVG() approximate query and nested query:
+with sql: SELECT AVG(score) FROM Mapping WHERE SentenceID IN ( SELECT id FROM Sentences WHERE Source = 1 ) ERROR_TARGET 10% CONFIDENCE 95%;
+approximate_results of AVG() = (0.9832869708538056, (0.9754899434462174, 0.9910839982613937))
+actual_results of AVG()= [(0.9801044231653213,)]
+
+test COUNT() approximate query:
+with sql: SELECT COUNT(score) FROM Mapping WHERE label = 'POSITIVE' ERROR_TARGET 10% CONFIDENCE 95%;
+approximate_results of COUNT() = (165.0, (141.87418984784512, 188.12581015215488))
+actual_results of COUNT() = [(164,)]"""
+
+Design desicion:
+There are three tables mentioned in the paper: 
+base table, which corresponds to table named Sentences in my code,
+and mappings table, represented as Mapping,
+for simplicity, the user-define-metadata is not presented.
+They have the following columns:
+
+CREATE TABLE IF NOT EXISTS Sentences (
+    id INTEGER PRIMARY KEY,
+    Sentence TEXT,
+    Source INT
+)
+
+
+CREATE TABLE IF NOT EXISTS Mapping (
+    SentenceID INTEGER,
+    Label TEXT,
+    Score FLOAT,
+    FOREIGN KEY (SentenceID) REFERENCES Sentences(id)
+)
+
+The query engine only support the approximate query with AVG(), SUM(), COUNT(), and the related testcases are ready once you run main.py. 
+
+I use sentiment analysis model in config.py through pipeline function in transformer module. And I use
+and let ChatGPT generate 300 one sentence data for testing.
+
+Things that can be improved:
+
+1 I did not impliment the stratified sampling mentioned in the paper, which casuse bias.
+2 I am not sure if the formula that I used to estimate the sum and count is correct.
+3 If the error_target are not satisfied, I do the query again with duplicated sample size. 
+This could be problematic as we end up sampling a large proportion of the overall population, 
+if the condition continue to be violeted as we increasing the sample size.
+4 currently it does not support using multiple functions like AVG() at the same time. This fucntionality can be added later.
